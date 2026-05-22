@@ -23,7 +23,7 @@ jobs:
         id: detect
         run: |
           set -euo pipefail
-          PLUGINS_JSON=$(python scripts/changed_subpaths.py origin/${{ github.base_ref }} HEAD)
+          PLUGINS_JSON=$(python _scripts/changed_subpaths.py origin/${{ github.base_ref }} HEAD)
           echo "plugins=$PLUGINS_JSON" >> "$GITHUB_OUTPUT"
           if [ "$PLUGINS_JSON" = "[]" ]; then
             echo "has-changes=false" >> "$GITHUB_OUTPUT"
@@ -49,4 +49,4 @@ jobs:
         with:
           python-version: "3.12"
       - name: Validate plugin.json
-        run: python scripts/validate_plugin.py ${{ matrix.plugin }}
+        run: python _scripts/validate_plugin.py ${{ matrix.plugin }}

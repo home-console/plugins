@@ -34,7 +34,7 @@ jobs:
           PUBLISH_ALL: ${{ inputs.publish_all && '1' || '0' }}
         run: |
           set -euo pipefail
-          PLUGINS_JSON=$(python scripts/changed_subpaths.py HEAD~1 HEAD)
+          PLUGINS_JSON=$(python _scripts/changed_subpaths.py HEAD~1 HEAD)
           echo "plugins=$PLUGINS_JSON" >> "$GITHUB_OUTPUT"
           if [ "$PLUGINS_JSON" = "[]" ]; then
             echo "has-changes=false" >> "$GITHUB_OUTPUT"
@@ -61,13 +61,13 @@ jobs:
         with:
           python-version: "3.12"
       - name: Validate plugin.json (defensive)
-        run: python scripts/validate_plugin.py ${{ matrix.plugin }}
+        run: python _scripts/validate_plugin.py ${{ matrix.plugin }}
       - name: Publish to marketplace
         env:
           MARKETPLACE_API_URL: ${{ secrets.MARKETPLACE_API_URL }}
           MARKETPLACE_PUBLISHER_TOKEN: ${{ secrets.MARKETPLACE_PUBLISHER_TOKEN }}
         run: |
-          python scripts/publish_plugin.py "${{ matrix.plugin }}" \
+          python _scripts/publish_plugin.py "${{ matrix.plugin }}" \
             --ref "${{ github.sha }}" \
             --channel stable \
             --create-if-missing

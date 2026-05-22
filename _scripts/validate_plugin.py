@@ -2,8 +2,8 @@
 """Локально/в CI проверить один плагин: схема plugin.json + наличие class_path-модуля.
 
 Usage:
-    python scripts/validate_plugin.py <plugin_dir>
-    python scripts/validate_plugin.py oauth_yandex
+    python _scripts/validate_plugin.py <plugin_dir>
+    python _scripts/validate_plugin.py oauth_yandex
 
 Exit code:
     0 — ок
