@@ -1,0 +1,73 @@
+name: Publish to marketplace
+
+on:
+  push:
+    branches: [master, main]
+  workflow_dispatch:
+    inputs:
+      publish_all:
+        description: "Опубликовать все плагины (а не только изменённые)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  detect-changes:
+    name: Determine plugins to publish
+    runs-on: ubuntu-latest
+    outputs:
+      plugins: ${{ steps.detect.outputs.plugins }}
+      has-changes: ${{ steps.detect.outputs.has-changes }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - name: Detect changed plugin subpaths
+        id: detect
+        env:
+          PUBLISH_ALL: ${{ inputs.publish_all && '1' || '0' }}
+        run: |
+          set -euo pipefail
+          PLUGINS_JSON=$(python scripts/changed_subpaths.py HEAD~1 HEAD)
+          echo "plugins=$PLUGINS_JSON" >> "$GITHUB_OUTPUT"
+          if [ "$PLUGINS_JSON" = "[]" ]; then
+            echo "has-changes=false" >> "$GITHUB_OUTPUT"
+            echo "No plugin folders changed — nothing to publish."
+          else
+            echo "has-changes=true" >> "$GITHUB_OUTPUT"
+            echo "Plugins to publish: $PLUGINS_JSON"
+          fi
+
+  publish:
+    name: Publish ${{ matrix.plugin }}
+    needs: detect-changes
+    if: needs.detect-changes.outputs.has-changes == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        plugin: ${{ fromJson(needs.detect-changes.outputs.plugins) }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Validate plugin.json (defensive)
+        run: python scripts/validate_plugin.py ${{ matrix.plugin }}
+      - name: Publish to marketplace
+        env:
+          MARKETPLACE_API_URL: ${{ secrets.MARKETPLACE_API_URL }}
+          MARKETPLACE_PUBLISHER_TOKEN: ${{ secrets.MARKETPLACE_PUBLISHER_TOKEN }}
+        run: |
+          python scripts/publish_plugin.py "${{ matrix.plugin }}" \
+            --ref "${{ github.sha }}" \
+            --channel stable \
+            --create-if-missing

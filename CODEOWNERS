@@ -1,0 +1,21 @@
+# Code owners для home-console/plugins.
+#
+# Синтаксис: <pattern> <owners>
+# Подробнее: https://docs.github.com/en/repositories/managing-your-repositories-settings-and-customizations/customizing-your-repository/about-code-owners
+#
+# По умолчанию любой плагин ревьюит мейнтейнер репо.
+# По мере роста — добавляй здесь со-мейнтейнеров на конкретные подпапки.
+
+# Default owner — на любой PR
+*                       @home-console/maintainers
+
+# CI/служебка — только админы
+/.github/               @home-console/admins
+/scripts/               @home-console/admins
+/CODEOWNERS             @home-console/admins
+/CONTRIBUTING.md        @home-console/admins
+/README.md              @home-console/admins
+
+# Пример персональных code owners для конкретного плагина:
+# /oauth_yandex/        @home-console/maintainers @misha
+# /yandex_smart_home/   @home-console/maintainers @misha

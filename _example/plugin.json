@@ -1,0 +1,16 @@
+{
+    "name": "_example",
+    "version": "0.1.0",
+    "description": "Шаблон плагина — скопируй эту папку и поменяй name на свой",
+    "author": "Home Console",
+    "class_path": "plugins._example.plugin.ExamplePlugin",
+    "role": "util",
+    "dependencies": [],
+    "namespace": "example",
+    "provides_services": [],
+    "provides_events": [],
+    "storage_namespaces": [],
+    "user_facing": false,
+    "is_integration": false,
+    "tags": ["example", "template"]
+}
