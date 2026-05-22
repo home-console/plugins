@@ -5,11 +5,13 @@
 Используется в .github/workflows/publish.yml и validate.yml.
 
 Usage:
-    python scripts/changed_subpaths.py <base_ref> <head_ref>
-    python scripts/changed_subpaths.py origin/main HEAD
+    python _scripts/changed_subpaths.py <base_ref> <head_ref>
+    python _scripts/changed_subpaths.py origin/master HEAD
 
 Вывод: JSON-массив имён папок плагинов (для GitHub Actions matrix).
 Пример: ["oauth_yandex", "network_scanner"]
+
+Конвенция: всё что начинается с '_' или '.' — служебное, не плагин.
 """
 
 from __future__ import annotations
@@ -22,7 +24,11 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
-SERVICE_DIRS = {".github", "scripts", "_example"}
+
+def is_service(name: str) -> bool:
+    """Всё, что начинается с '_' или '.', считается служебной папкой/файлом
+    (не плагин)."""
+    return name.startswith("_") or name.startswith(".")
 
 
 def is_plugin_dir(path: Path) -> bool:
@@ -32,7 +38,7 @@ def is_plugin_dir(path: Path) -> bool:
 def all_plugin_dirs() -> list[str]:
     result: list[str] = []
     for entry in sorted(REPO_ROOT.iterdir()):
-        if entry.name.startswith(".") or entry.name in SERVICE_DIRS:
+        if is_service(entry.name):
             continue
         if is_plugin_dir(entry):
             result.append(entry.name)
@@ -74,7 +80,7 @@ def main() -> int:
             if not parts:
                 continue
             top = parts[0]
-            if top.startswith(".") or top in SERVICE_DIRS:
+            if is_service(top):
                 continue
             if is_plugin_dir(REPO_ROOT / top):
                 touched.add(top)

@@ -10,7 +10,7 @@ ENV:
     GITHUB_SHA                   — sha коммита (предустанавливается github actions)
 
 Usage:
-    python scripts/publish_plugin.py <plugin_name>
+    python _scripts/publish_plugin.py <plugin_name>
         [--ref <ref>]            (по умолчанию GITHUB_SHA)
         [--channel <channel>]    (по умолчанию stable)
         [--no-force]             (по умолчанию force_replace=true)

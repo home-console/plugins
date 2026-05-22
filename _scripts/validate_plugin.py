@@ -2,8 +2,8 @@
 """Локально/в CI проверить один плагин: схема plugin.json + наличие class_path-модуля.
 
 Usage:
-    python scripts/validate_plugin.py <plugin_dir>
-    python scripts/validate_plugin.py oauth_yandex
+    python _scripts/validate_plugin.py <plugin_dir>
+    python _scripts/validate_plugin.py oauth_yandex
 
 Exit code:
     0 — ок
@@ -20,7 +20,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
-REQUIRED_FIELDS = {"name", "version", "description", "class_path", "role"}
+REQUIRED_FIELDS = {"name", "version", "description", "class_path"}
 NAME_RE = re.compile(r"^[a-z_][a-z0-9_]*$")
 SEMVER_RE = re.compile(r"^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.\-]+)?$")
 ALLOWED_ROLES = {"capability_provider", "integration", "util", "core_extension"}
@@ -81,20 +81,37 @@ def validate(plugin_dir: Path) -> list[str]:
     class_path = data.get("class_path", "")
     if class_path:
         parts = class_path.split(".")
-        if len(parts) < 3 or parts[0] != "plugins" or parts[1] != name:
+        if len(parts) < 2:
             err(
-                f"plugin.json.class_path='{class_path}' должно начинаться с "
-                f"'plugins.{name}.'",
+                f"plugin.json.class_path='{class_path}' должен быть в формате "
+                f"'<module>.<Class>' или 'plugins.{name}.<module>.<Class>'",
                 errors,
             )
         else:
-            module_rel = Path(*parts[2:-1]).with_suffix(".py")
-            module_path = plugin_dir / module_rel
-            if not module_path.is_file():
-                err(
-                    f"class_path указывает на отсутствующий модуль: {module_path}",
-                    errors,
-                )
+            # Поддерживаем два формата:
+            #   1) plugins.<name>.<module>[...].<Class>   (абсолютный от корня core)
+            #   2) <module>[...].<Class>                  (относительный от папки плагина)
+            if parts[0] == "plugins":
+                if len(parts) < 4 or parts[1] != name:
+                    err(
+                        f"plugin.json.class_path='{class_path}' начинается с 'plugins.', "
+                        f"но дальше должно идти '{name}.<module>.<Class>'",
+                        errors,
+                    )
+                    module_parts: list[str] = []
+                else:
+                    module_parts = parts[2:-1]
+            else:
+                module_parts = parts[:-1]
+
+            if module_parts:
+                module_rel = Path(*module_parts).with_suffix(".py")
+                module_path = plugin_dir / module_rel
+                if not module_path.is_file():
+                    err(
+                        f"class_path указывает на отсутствующий модуль: {module_path}",
+                        errors,
+                    )
 
     deps = data.get("dependencies", [])
     if not isinstance(deps, list):

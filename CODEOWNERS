@@ -11,7 +11,8 @@
 
 # CI/служебка — только админы
 /.github/               @home-console/admins
-/scripts/               @home-console/admins
+/_scripts/              @home-console/admins
+/_example/              @home-console/admins
 /CODEOWNERS             @home-console/admins
 /CONTRIBUTING.md        @home-console/admins
 /README.md              @home-console/admins
