@@ -37,15 +37,19 @@ my_plugin_name/
 | `name` | string (snake_case) | `"oauth_yandex"` |
 | `version` | semver | `"0.1.0"` |
 | `description` | string | `"OAuth helper для Яндекса"` |
-| `class_path` | string (Python dotted) | `"plugins.oauth_yandex.plugin.OAuthYandexPlugin"` |
-| `role` | enum | `"capability_provider"` \| `"integration"` \| `"util"` |
-| `dependencies` | string[] | `[]` |
+| `class_path` | string (Python dotted) | `"plugins.oauth_yandex.plugin.OAuthYandexPlugin"` или короткий `"plugin.MyPlugin"` |
 
 `name` **должен совпадать с именем папки**. Если не совпадает, CI зарежет PR.
 
-Опционально: `min_runtime`, `provides_services`, `provides_events`,
-`storage_namespaces`, `namespace`, `capability`, `is_integration`,
-`integration_name`, `integration_flags`, `type`, `tags`.
+`class_path` поддерживает два формата:
+- абсолютный: `plugins.<name>.<module>.<ClassName>` (как у `oauth_yandex`)
+- короткий: `<module>.<ClassName>` (как у `remote_plugin_proxy`, считается
+  относительно корня папки плагина)
+
+Опционально: `role`, `dependencies`, `min_runtime`, `provides_services`,
+`provides_events`, `storage_namespaces`, `namespace`, `capability`,
+`is_integration`, `integration_name`, `integration_flags`, `type`, `tags`,
+`execution_mode`, `dynamic_service_registration`, `user_facing`.
 
 ## CI: что проверяется на PR
 
