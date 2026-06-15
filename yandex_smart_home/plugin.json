@@ -1,0 +1,29 @@
+{
+    "class_path": "plugins.yandex_smart_home.plugin.YandexSmartHomeRealPlugin",
+    "name": "yandex_smart_home",
+    "version": "0.1.0",
+    "description": "Интеграция с Яндекс Умным Домом - синхронизация реальных устройств",
+    "author": "Home Console",
+    "dependencies": [
+        "oauth_yandex"
+    ],
+    "namespace": "yandex",
+    "allowed_services": [
+        "logger.*",
+        "devices.auto_map_own"
+    ],
+    "provides_events": [
+        "external.device_discovered",
+        "external.device_state_reported"
+    ],
+    "storage_namespaces": [
+        "devices",
+        "devices_mappings",
+        "yandex"
+    ],
+    "is_integration": true,
+    "integration_name": "Yandex Smart Home",
+    "integration_flags": [
+        "requires_oauth"
+    ]
+}
