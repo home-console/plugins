@@ -430,7 +430,10 @@ class YandexSession:
         if not x_token:
             return LoginResponse({"errors": ["token.not_found"]})
 
-        return await self.validate_token(x_token)
+        result = await self.validate_token(x_token)
+        if result.ok and self.x_token:
+            await self.login_token(self.x_token)
+        return result
 
     async def validate_token(self, x_token: str) -> LoginResponse:
         """Валидация токена и получение информации о пользователе."""

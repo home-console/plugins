@@ -296,6 +296,31 @@ class YandexDeviceAuthService:
             await self._log("error", f"Failed to save cookies: {e}")
             raise
 
+    async def refresh_quasar_cookies(self) -> Dict[str, Any]:
+        """Обновить cookies для Quasar API через сохранённый x_token."""
+        account = await self._load_account_session()
+        x_token = (account or {}).get("x_token") if isinstance(account, dict) else None
+        if not x_token:
+            return {"ok": False, "error": "not_linked"}
+
+        session = aiohttp.ClientSession()
+        try:
+            ys = YandexSession(session, x_token=str(x_token))
+            ok = await ys.login_token(str(x_token))
+            if not ok:
+                return {"ok": False, "error": "login_token_failed"}
+
+            cookies = ys.get_cookies_dict()
+            if account:
+                account = dict(account)
+                account["cookies"] = cookies
+                await self._save_account_session(account)
+            else:
+                await self.plugin.storage_set("yandex", "cookies", cookies)
+            return {"ok": True, "cookies_count": len(cookies)}
+        finally:
+            await session.close()
+
     async def unlink_account(self) -> Dict[str, Any]:
         """Unlink account and clear session."""
         try:

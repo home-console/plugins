@@ -782,54 +782,55 @@ class YandexAPIClient:
         jar.update_cookies(cookie_dict, response_url=URL("https://yandex.ru"))
         return jar
 
-    async def _get_quasar_csrf_token(self, session: aiohttp.ClientSession) -> Optional[str]:
-        """Получить CSRF-токен для POST (как в YandexStation: GET yandex.ru/quasar, парсим csrfToken2)."""
+    _QUASAR_CSRF_PATTERNS = (
+        re.compile(r'"csrfToken2"\s*:\s*"([^"]+)"'),
+        re.compile(r'"csrfToken"\s*:\s*"([^"]+)"'),
+        re.compile(r'csrfToken2":"(.+?)"'),
+    )
+
+    _QUASAR_UA = (
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
+        "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    )
+
+    async def _fetch_quasar_csrf(self, session: aiohttp.ClientSession) -> Optional[str]:
+        """CSRF для POST в Quasar (GET yandex.ru/quasar → csrfToken2)."""
+        headers = {"User-Agent": self._QUASAR_UA}
+        for url in ("https://yandex.ru/quasar", "https://yandex.ru/quasar?storage=1"):
+            try:
+                async with session.get(
+                    url,
+                    headers=headers,
+                    timeout=aiohttp.ClientTimeout(total=10),
+                ) as resp:
+                    if resp.status != 200:
+                        continue
+                    raw = await resp.text()
+                    for pattern in self._QUASAR_CSRF_PATTERNS:
+                        match = pattern.search(raw)
+                        if match and match.group(1):
+                            return match.group(1)
+            except Exception:
+                continue
+        return None
+
+    async def _refresh_quasar_cookies(self) -> bool:
         try:
-            async with session.get(
-                "https://yandex.ru/quasar",
-                headers={"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"},
-                timeout=aiohttp.ClientTimeout(total=10),
-            ) as resp:
-                if resp.status != 200:
-                    return None
-                raw = await resp.text()
-                m = re.search(r'"csrfToken2"\s*:\s*"([^"]+)"', raw)
-                if m:
-                    return m.group(1)
-                return None
+            if not await self.plugin.has_service("yandex_device_auth.refresh_cookies"):
+                return False
+            result = await self.plugin.call_service("yandex_device_auth.refresh_cookies")
+            return isinstance(result, dict) and bool(result.get("ok"))
         except Exception:
-            return None
+            return False
 
     async def send_device_action_quasar(
         self, device_id: str, actions: list
     ) -> Dict[str, Any]:
-        """Отправить команду устройству через Quasar API (cookies, без OAuth).
-
-        Используется при входе через device auth, когда OAuth токена нет.
-        Формат Quasar: POST /m/user/devices/{id}/actions, body {"actions": [...]}
-        Cookies и заголовки — как в Quasar WS (domain .yandex.ru, User-Agent).
-        """
-        try:
-            from yarl import URL
-        except ImportError:
-            raise RuntimeError("Требуется yarl для Quasar API")
-        cookies = await oauth_get_cookies(self.plugin) or {}
-        if not cookies:
-            raise RuntimeError("Cookies required for Quasar. Use device auth or set cookies.")
-        jar = self._quasar_cookie_jar(cookies)
-        base_headers = {
-            "Content-Type": "application/json",
-            "Accept": "application/json",
-            "Origin": "https://iot.quasar.yandex.ru",
-            "Referer": "https://iot.quasar.yandex.ru/",
-            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
-        }
-        # Пробуем оба пути: /m/user/ (как в YandexStation) и /m/v3/
+        """Отправить команду устройству через Quasar API (cookies, без OAuth)."""
         urls_to_try = [
             f"https://iot.quasar.yandex.ru/m/user/devices/{device_id}/actions",
             f"https://iot.quasar.yandex.ru/m/v3/user/devices/{device_id}/actions",
         ]
-        # Варианты тела: часть клиентов Quasar ожидает "actions", часть — "states"; state с value без instance
         states_fallback = []
         for a in actions:
             if isinstance(a, dict):
@@ -844,50 +845,89 @@ class YandexAPIClient:
             {"states": states_fallback} if states_fallback else None,
         ]
         timeout = aiohttp.ClientTimeout(total=15)
-        last_error = None
-        async with aiohttp.ClientSession(cookie_jar=jar, timeout=timeout) as session:
-            csrf_token = await self._get_quasar_csrf_token(session)
-            if csrf_token:
-                base_headers["x-csrf-token"] = csrf_token
-            for request_body in bodies_to_try:
-                if request_body is None:
-                    continue
-                for url in urls_to_try:
+        last_error: tuple[int, str] = (403, "Forbidden")
+        cookies_refreshed = False
+
+        for _cookie_round in range(2):
+            cookies = await oauth_get_cookies(self.plugin) or {}
+            if not cookies:
+                raise RuntimeError("Cookies required for Quasar. Use device auth or set cookies.")
+            jar = self._quasar_cookie_jar(cookies)
+            base_headers = {
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+                "Origin": "https://iot.quasar.yandex.ru",
+                "Referer": "https://iot.quasar.yandex.ru/",
+                "User-Agent": self._QUASAR_UA,
+            }
+
+            async with aiohttp.ClientSession(cookie_jar=jar, timeout=timeout) as session:
+                csrf_token = await self._fetch_quasar_csrf(session)
+                if not csrf_token:
                     try:
-                        async with session.post(url, headers=base_headers, json=request_body) as resp:
-                            text = await resp.text()
-                            if resp.status < 400:
-                                try:
-                                    await self.plugin.call_service(
-                                        "logger.log",
-                                        level="info",
-                                        message=f"Quasar command OK for {device_id}",
-                                        plugin=self.plugin_name,
-                                        context={"url": url, "body_key": list(request_body.keys())[0]},
-                                    )
-                                except Exception:
-                                    pass
-                                if not text.strip():
-                                    return {}
-                                try:
-                                    import json as _json
-                                    return _json.loads(text)
-                                except Exception:
-                                    return {}
-                            last_error = (resp.status, text)
+                        await self.plugin.call_service(
+                            "logger.log",
+                            level="warning",
+                            message="Quasar CSRF token not found in yandex.ru/quasar response",
+                            plugin=self.plugin_name,
+                        )
+                    except Exception:
+                        pass
+
+                for request_body in bodies_to_try:
+                    if request_body is None:
+                        continue
+                    for url in urls_to_try:
+                        for csrf_round in range(2):
+                            headers = dict(base_headers)
+                            if csrf_token:
+                                headers["x-csrf-token"] = csrf_token
                             try:
-                                await self.plugin.call_service(
-                                    "logger.log",
-                                    level="warning",
-                                    message=f"Quasar {resp.status} for {url}: {text[:500]}",
-                                    plugin=self.plugin_name,
-                                    context={"url": url, "status": resp.status, "body_preview": text[:300]},
-                                )
-                            except Exception:
-                                pass
-                    except Exception as e:
-                        last_error = (0, str(e))
-        status, text = last_error or (403, "Forbidden")
+                                async with session.post(url, headers=headers, json=request_body) as resp:
+                                    text = await resp.text()
+                                    if resp.status < 400:
+                                        try:
+                                            await self.plugin.call_service(
+                                                "logger.log",
+                                                level="info",
+                                                message=f"Quasar command OK for {device_id}",
+                                                plugin=self.plugin_name,
+                                                context={"url": url, "body_key": list(request_body.keys())[0]},
+                                            )
+                                        except Exception:
+                                            pass
+                                        if not text.strip():
+                                            return {}
+                                        try:
+                                            import json as _json
+                                            return _json.loads(text)
+                                        except Exception:
+                                            return {}
+                                    last_error = (resp.status, text)
+                                    if resp.status == 403 and csrf_round == 0:
+                                        csrf_token = await self._fetch_quasar_csrf(session)
+                                        continue
+                                    try:
+                                        await self.plugin.call_service(
+                                            "logger.log",
+                                            level="warning",
+                                            message=f"Quasar {resp.status} for {url}: {text[:500]}",
+                                            plugin=self.plugin_name,
+                                            context={"url": url, "status": resp.status, "body_preview": text[:300]},
+                                        )
+                                    except Exception:
+                                        pass
+                                    break
+                            except Exception as e:
+                                last_error = (0, str(e))
+
+            if last_error[0] == 403 and not cookies_refreshed:
+                cookies_refreshed = await self._refresh_quasar_cookies()
+                if cookies_refreshed:
+                    continue
+            break
+
+        status, text = last_error
         raise RuntimeError(f"Quasar actions HTTP {status}: {text[:400]}")
 
     async def get_quasar_devices(self) -> Dict[str, Any]:

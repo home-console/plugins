@@ -10,7 +10,10 @@
   "namespace": "yandex",
   "allowed_services": [
     "logger.*",
-    "devices.auto_map_own"
+    "devices.auto_map_own",
+    "devices.get",
+    "devices.update_device_fields",
+    "yandex_device_auth.refresh_cookies"
   ],
   "provides_events": [
     "external.device_discovered",
@@ -35,6 +38,18 @@
       {
         "service": "yandex_device_auth.get_session",
         "reason": "Управление авторизацией устройств"
+      },
+      {
+        "service": "yandex_device_auth.refresh_cookies",
+        "reason": "Обновить Quasar cookies для POST-команд"
+      },
+      {
+        "service": "devices.get",
+        "reason": "Сброс pending-состояния при ошибке команды"
+      },
+      {
+        "service": "devices.update_device_fields",
+        "reason": "Обновление state устройства после ошибки команды"
       },
       {
         "service": "devices.auto_map_own",

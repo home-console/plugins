@@ -335,6 +335,16 @@ class YandexDeviceAuthPlugin(BasePlugin):
             auth_config=device_public,
         )
 
+        async def refresh_quasar_cookies(**kwargs) -> Dict[str, Any]:
+            return await self.auth_service.refresh_quasar_cookies()
+
+        await self.register_service(
+            "yandex_device_auth.refresh_cookies",
+            refresh_quasar_cookies,
+            admin_only=False,
+            auth_config=yandex_scoped,
+        )
+
         # Register HTTP endpoints
         from sdk.http import HttpEndpoint
         from sdk.http import EndpointAuthConfig
@@ -462,6 +472,7 @@ class YandexDeviceAuthPlugin(BasePlugin):
             await self.unregister_service("yandex_device_auth.cancel")
             await self.unregister_service("yandex_device_auth.unlink")
             await self.unregister_service("yandex_device_auth.get_session")
+            await self.unregister_service("yandex_device_auth.refresh_cookies")
             await self.unregister_service("device_auth.start")
             await self.unregister_service("device_auth.status")
             await self.unregister_service("device_auth.cookies")
