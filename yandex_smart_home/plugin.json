@@ -58,5 +58,38 @@
     "provides_services": [],
     "provides_events": [],
     "capabilities_provided": []
-  }
+  },
+  "permissions": [
+    {
+      "id": "yandex.account",
+      "title": "Аккаунт Яндекс",
+      "description": "Читать и обновлять токен для API Умного дома",
+      "sensitivity": "high",
+      "requires": {
+        "capabilities": ["oauth:yandex"],
+        "services": ["oauth_yandex.get_access_token"]
+      }
+    },
+    {
+      "id": "yandex.device_sessions",
+      "title": "Сессии устройств",
+      "description": "Получать cookies после QR-привязки устройств к аккаунту",
+      "sensitivity": "high",
+      "requires": {
+        "capabilities": ["yandex:session_cookies"],
+        "services": ["yandex_device_auth.get_session"],
+        "events": ["yandex.device_auth.linked"]
+      }
+    },
+    {
+      "id": "yandex.devices",
+      "title": "Ваши устройства",
+      "description": "Регистрировать устройства в Home Console и отправлять команды (вкл/выкл, яркость и др.)",
+      "sensitivity": "medium",
+      "requires": {
+        "services": ["devices.auto_map_own"],
+        "events": ["internal.device_command_requested"]
+      }
+    }
+  ]
 }

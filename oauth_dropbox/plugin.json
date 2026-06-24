@@ -61,5 +61,17 @@
     "capabilities_provided": [
       "oauth:dropbox"
     ]
-  }
+  },
+  "permissions": [
+    {
+      "id": "dropbox.oauth",
+      "title": "Аккаунт Dropbox",
+      "description": "Хранить OAuth-токены и обновлять их для доступа к Dropbox от имени вашего аккаунта",
+      "sensitivity": "high",
+      "requires": {
+        "capabilities": ["oauth:dropbox"],
+        "services": ["oauth_dropbox.get_access_token", "oauth_dropbox.get_authorize_url"]
+      }
+    }
+  ]
 }

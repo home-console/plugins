@@ -124,5 +124,31 @@
       }
     ],
     "capabilities_provided": []
-  }
+  },
+  "permissions": [
+    {
+      "id": "proxmox.api",
+      "title": "Сервер Proxmox VE",
+      "description": "Подключаться к API Proxmox с вашими учётными данными: управление VM, контейнерами и хранилищами",
+      "sensitivity": "high",
+      "requires": {
+        "services": [
+          "proxmox.node.list",
+          "proxmox.vm.start",
+          "proxmox.vm.stop",
+          "proxmox.ct.start",
+          "proxmox.ct.stop"
+        ]
+      }
+    },
+    {
+      "id": "proxmox.agents",
+      "title": "Удалённые агенты",
+      "description": "Регистрировать команды Proxmox для агентов с pvesh (если установлен client_manager)",
+      "sensitivity": "medium",
+      "requires": {
+        "services": ["client_manager.commands.register"]
+      }
+    }
+  ]
 }

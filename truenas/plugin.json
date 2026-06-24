@@ -105,5 +105,22 @@
       }
     ],
     "capabilities_provided": []
-  }
+  },
+  "permissions": [
+    {
+      "id": "truenas.api",
+      "title": "Сервер TrueNAS",
+      "description": "Подключаться к API TrueNAS: пулы ZFS, датасеты, снапшоты, SMB/NFS-шары",
+      "sensitivity": "high",
+      "requires": {
+        "services": [
+          "truenas.pool.list",
+          "truenas.dataset.create",
+          "truenas.dataset.delete",
+          "truenas.snapshot.create",
+          "truenas.snapshot.delete"
+        ]
+      }
+    }
+  ]
 }

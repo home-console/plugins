@@ -43,5 +43,17 @@
       "oauth:yandex",
       "yandex:session_cookies"
     ]
-  }
+  },
+  "permissions": [
+    {
+      "id": "yandex.oauth",
+      "title": "Аккаунт Яндекс",
+      "description": "Хранить OAuth-токены и обновлять их для доступа к API Яндекса от имени вашего аккаунта",
+      "sensitivity": "high",
+      "requires": {
+        "capabilities": ["oauth:yandex", "yandex:session_cookies"],
+        "services": ["oauth_yandex.get_access_token", "oauth_yandex.get_status"]
+      }
+    }
+  ]
 }

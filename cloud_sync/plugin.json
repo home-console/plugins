@@ -121,5 +121,48 @@
       }
     ],
     "capabilities_provided": []
-  }
+  },
+  "permissions": [
+    {
+      "id": "cloud.storage",
+      "title": "Облачные хранилища",
+      "description": "Загружать, скачивать и удалять файлы в подключённых облаках (Яндекс.Диск, Google Drive, Dropbox)",
+      "sensitivity": "medium",
+      "requires": {
+        "services": [
+          "cloud_sync.upload",
+          "cloud_sync.download",
+          "cloud_sync.list",
+          "cloud_sync.delete"
+        ]
+      }
+    },
+    {
+      "id": "cloud.oauth_google",
+      "title": "Google-аккаунт",
+      "description": "Использовать OAuth-токен Google Drive (если установлен плагин oauth_google)",
+      "sensitivity": "high",
+      "requires": {
+        "services": ["oauth_google.get_access_token"]
+      }
+    },
+    {
+      "id": "cloud.oauth_dropbox",
+      "title": "Dropbox-аккаунт",
+      "description": "Использовать OAuth-токен Dropbox (если установлен плагин oauth_dropbox)",
+      "sensitivity": "high",
+      "requires": {
+        "services": ["oauth_dropbox.get_access_token"]
+      }
+    },
+    {
+      "id": "cloud.agent_files",
+      "title": "Файлы от агентов",
+      "description": "Автоматически выгружать в облако файлы, загруженные удалёнными агентами",
+      "sensitivity": "medium",
+      "requires": {
+        "events": ["file.uploaded"]
+      }
+    }
+  ]
 }

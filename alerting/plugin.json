@@ -74,5 +74,16 @@
       }
     ],
     "capabilities_provided": []
-  }
+  },
+  "permissions": [
+    {
+      "id": "alerting.monitoring",
+      "title": "Мониторинг и оповещения",
+      "description": "Отслеживать события системы, хранить правила алертинга и публиковать уведомления о срабатываниях",
+      "sensitivity": "low",
+      "requires": {
+        "events": ["alert.triggered"]
+      }
+    }
+  ]
 }

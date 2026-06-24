@@ -43,6 +43,24 @@
     "provides_events": [],
     "capabilities_provided": []
   },
+  "permissions": [
+    {
+      "id": "telegram.alerts",
+      "title": "Уведомления об алертах",
+      "description": "Получать события о срабатывании правил и отправлять их в настроенный Telegram-чат",
+      "sensitivity": "medium",
+      "requires": {
+        "events": ["alert.triggered"],
+        "services": ["telegram_bot.send"]
+      }
+    },
+    {
+      "id": "telegram.credentials",
+      "title": "Telegram-бот",
+      "description": "Хранить токен бота и ID чата для отправки сообщений",
+      "sensitivity": "high"
+    }
+  ],
   "ui": {
     "pages": [
       {

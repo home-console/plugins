@@ -2,7 +2,7 @@
   "class_path": "plugin.RemotePluginProxy",
   "name": "remote_plugin_proxy",
   "version": "0.1.0",
-  "description": "Local proxy that forwards calls to a remote plugin over HTTP",
+  "description": "Локальный прокси: перенаправляет вызовы к удалённому плагину по HTTP",
   "author": "Home Console",
   "dependencies": [],
   "execution_mode": "in_process",
@@ -14,5 +14,13 @@
     "provides_services": [],
     "provides_events": [],
     "capabilities_provided": []
-  }
+  },
+  "permissions": [
+    {
+      "id": "proxy.remote",
+      "title": "Удалённый плагин",
+      "description": "Перенаправлять вызовы сервисов на удалённый плагин по HTTP (URL и ключи задаются в настройках)",
+      "sensitivity": "high"
+    }
+  ]
 }

@@ -14,7 +14,23 @@
     "subscribes_events": [],
     "capabilities_required": [],
     "provides_services": [],
-    "provides_events": [],
+    "provides_events": [
+      {
+        "event": "external.device_discovered",
+        "description": "Обнаружено устройство в локальной сети"
+      }
+    ],
     "capabilities_provided": []
-  }
+  },
+  "permissions": [
+    {
+      "id": "network.scan",
+      "title": "Локальная сеть",
+      "description": "Сканировать устройства в вашей локальной сети и сообщать о новых находках",
+      "sensitivity": "medium",
+      "requires": {
+        "events": ["external.device_discovered"]
+      }
+    }
+  ]
 }

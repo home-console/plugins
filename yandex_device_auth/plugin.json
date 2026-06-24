@@ -42,7 +42,20 @@
     "capabilities_required": [
       "oauth:yandex"
     ],
-    "provides_services": [],
+    "provides_services": [
+      {
+        "service": "yandex_device_auth.get_session",
+        "description": "Сессия аккаунта (cookies) для Quasar WS"
+      },
+      {
+        "service": "yandex_device_auth.start",
+        "description": "Запуск QR/device авторизации"
+      },
+      {
+        "service": "device_auth.get_session",
+        "description": "Legacy alias get_session"
+      }
+    ],
     "provides_events": [
       {
         "event": "yandex.device_auth.linked",
@@ -56,5 +69,28 @@
     "capabilities_provided": [
       "yandex:session_cookies"
     ]
-  }
+  },
+  "permissions": [
+    {
+      "id": "yandex.oauth",
+      "title": "Аккаунт Яндекс",
+      "description": "Использовать OAuth-токен Яндекса для запуска привязки устройств",
+      "sensitivity": "high",
+      "requires": {
+        "capabilities": ["oauth:yandex"],
+        "services": ["oauth_yandex.get_access_token"]
+      }
+    },
+    {
+      "id": "yandex.device_sessions",
+      "title": "Сессии устройств",
+      "description": "Хранить session cookies после QR-привязки и публиковать события привязки/отвязки",
+      "sensitivity": "high",
+      "requires": {
+        "capabilities": ["yandex:session_cookies"],
+        "services": ["yandex_device_auth.get_session", "yandex_device_auth.start"],
+        "events": ["yandex.device_auth.linked", "yandex.device_auth.unlinked"]
+      }
+    }
+  ]
 }

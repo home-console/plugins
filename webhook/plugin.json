@@ -72,5 +72,22 @@
       }
     ],
     "capabilities_provided": []
-  }
+  },
+  "permissions": [
+    {
+      "id": "webhook.alerts",
+      "title": "Уведомления об алертах",
+      "description": "Получать события о срабатывании правил алертинга",
+      "sensitivity": "medium",
+      "requires": {
+        "events": ["alert.triggered"]
+      }
+    },
+    {
+      "id": "webhook.outbound",
+      "title": "Исходящие HTTP-запросы",
+      "description": "Отправлять POST-запросы на настроенные вами URL (webhook-эндпоинты)",
+      "sensitivity": "medium"
+    }
+  ]
 }

@@ -143,6 +143,32 @@
       "wireguard:vpn"
     ]
   },
+  "permissions": [
+    {
+      "id": "wireguard.vpn",
+      "title": "VPN-сети WireGuard",
+      "description": "Создавать VPN-сети, управлять пирами и выдавать конфигурации подключения",
+      "sensitivity": "high",
+      "requires": {
+        "capabilities": ["wireguard:vpn"],
+        "services": [
+          "wireguard.create_network",
+          "wireguard.add_peer",
+          "wireguard.get_config"
+        ]
+      }
+    },
+    {
+      "id": "wireguard.agents",
+      "title": "Удалённые агенты",
+      "description": "Мониторить mesh-сеть через подключённых агентов и автоматически добавлять пиры",
+      "sensitivity": "medium",
+      "requires": {
+        "services": ["client_manager.list_clients", "client_manager._impl.execute_command"],
+        "events": ["client.connected"]
+      }
+    }
+  ],
   "cli": {
     "subcommands": [
       {

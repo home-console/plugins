@@ -12,7 +12,6 @@
     "storage_namespaces": [],
     "user_facing": false,
     "is_integration": false,
-    "tags": ["example", "template"],
     "contract": {
         "consumes_services": [],
         "subscribes_events": [],
@@ -20,5 +19,13 @@
         "provides_services": [],
         "provides_events": [],
         "capabilities_provided": []
-    }
+    },
+    "permissions": [
+        {
+            "id": "example.basic",
+            "title": "Пример доступа",
+            "description": "Шаблон permission — опишите, к чему плагин получает доступ",
+            "sensitivity": "low"
+        }
+    ]
 }
