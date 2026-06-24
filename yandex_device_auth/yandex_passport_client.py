@@ -68,18 +68,14 @@ class YandexPassportClient:
     """
 
     CLIENT_ID = "c0ebe342af7d48fbbbfcf2d2eedb8f9e"
-    # SECURITY: CLIENT_SECRET moved to environment variable
-    # Set YANDEX_CLIENT_SECRET env variable
+    CLIENT_SECRET = "ad0a908f0aa341a182a37ecd75bc319e"
 
     def __init__(self):
         """Initialize client."""
         import os
-        self.client_secret = os.environ.get("YANDEX_CLIENT_SECRET")
-        if not self.client_secret:
-            raise RuntimeError(
-                "YANDEX_CLIENT_SECRET environment variable not set. "
-                "System cannot start without OAuth client secret."
-            )
+        self.client_secret = (
+            os.environ.get("YANDEX_CLIENT_SECRET") or self.CLIENT_SECRET
+        )
 
     async def get_qr_url(self, auth_session: DeviceAuthSession) -> Optional[Dict[str, str]]:
         """Get PWL QR URL - simple GET request to Yandex PWL page.

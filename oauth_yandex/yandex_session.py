@@ -267,9 +267,10 @@ class YandexSession:
             cookies = "; ".join([f"{p['name']}={p['value']}" for p in raw])
 
         import os
-        client_secret = os.environ.get("YANDEX_CLIENT_SECRET")
-        if not client_secret:
-            raise RuntimeError("YANDEX_CLIENT_SECRET environment variable not set")
+        client_secret = (
+            os.environ.get("YANDEX_CLIENT_SECRET")
+            or "ad0a908f0aa341a182a37ecd75bc319e"
+        )
         
         r = await self._post(
             "https://mobileproxy.passport.yandex.net/1/bundle/oauth/token_by_sessionid",

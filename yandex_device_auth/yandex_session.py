@@ -34,6 +34,10 @@ _STATUS_URL = f"{_PASSPORT_URL}/pwl-yandex/api/passport/auth/magic/code/status"
 _GET_SESSION_URL = f"{_PASSPORT_URL}/pwl-yandex/api/passport/sessions/get_session"
 _QR_STATE_CONFIRMED = "otp_auth_finished"
 
+# Публичные credentials Yandex Passport Android SDK (есть в каждом APK, не секрет).
+_PASSPORT_CLIENT_ID = "c0ebe342af7d48fbbbfcf2d2eedb8f9e"
+_PASSPORT_CLIENT_SECRET = "ad0a908f0aa341a182a37ecd75bc319e"
+
 _DEFAULT_HEADERS = {
     "User-Agent": (
         "Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 "
@@ -56,6 +60,11 @@ def _extract_csrf(html: str) -> str:
         if match and match.group(1):
             return match.group(1)
     raise ValueError(f"Не удалось найти csrf_token: {html[:200]}")
+
+
+def _passport_client_secret() -> str:
+    """YANDEX_CLIENT_SECRET env overrides the public Android app default."""
+    return (os.environ.get("YANDEX_CLIENT_SECRET") or _PASSPORT_CLIENT_SECRET).strip()
 
 
 def _encode_cookie_state(session: ClientSession) -> str:
@@ -406,14 +415,12 @@ class YandexSession:
             host = next((p["domain"] for p in raw if p["domain"].startswith(".yandex.")), host)
             cookies = "; ".join([f"{p['name']}={p['value']}" for p in raw])
 
-        client_secret = (os.environ.get("YANDEX_CLIENT_SECRET") or "").strip()
-        if not client_secret:
-            raise RuntimeError("YANDEX_CLIENT_SECRET environment variable not set")
+        client_secret = _passport_client_secret()
 
         r = await self._post(
             "https://mobileproxy.passport.yandex.net/1/bundle/oauth/token_by_sessionid",
             data={
-                "client_id": "c0ebe342af7d48fbbbfcf2d2eedb8f9e",
+                "client_id": _PASSPORT_CLIENT_ID,
                 "client_secret": client_secret,
             },
             headers={"Ya-Client-Host": host, "Ya-Client-Cookie": cookies},

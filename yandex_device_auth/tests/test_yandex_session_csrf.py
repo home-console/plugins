@@ -18,3 +18,11 @@ def test_extract_csrf_window_global() -> None:
 def test_extract_csrf_missing_raises() -> None:
     with pytest.raises(ValueError, match="csrf_token"):
         _extract_csrf("<html><title>Log in</title></html>")
+
+
+def test_passport_client_secret_default(monkeypatch) -> None:
+    from plugins.yandex_device_auth.yandex_session import _passport_client_secret
+
+    monkeypatch.delenv("YANDEX_CLIENT_SECRET", raising=False)
+    assert _passport_client_secret() == "ad0a908f0aa341a182a37ecd75bc319e"
+
