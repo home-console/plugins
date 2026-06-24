@@ -25,7 +25,37 @@ from yarl import URL
 
 _LOGGER = logging.getLogger(__name__)
 
+_PASSPORT_URL = "https://passport.yandex.ru"
+_AM_URL = f"{_PASSPORT_URL}/pwl-yandex/am?app_platform=android"
+_BFF_REFERER = f"{_PASSPORT_URL}/pwl-yandex"
+_SUBMIT_URL = f"{_PASSPORT_URL}/pwl-yandex/api/passport/auth/password/submit"
+_MAGIC_CODE_URL = f"{_PASSPORT_URL}/pwl-yandex/api/passport/auth/magic/code"
+_STATUS_URL = f"{_PASSPORT_URL}/pwl-yandex/api/passport/auth/magic/code/status"
+_GET_SESSION_URL = f"{_PASSPORT_URL}/pwl-yandex/api/passport/sessions/get_session"
+_QR_STATE_CONFIRMED = "otp_auth_finished"
+
+_DEFAULT_HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 "
+        "(KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
+    ),
+}
+
+_CSRF_PATTERNS = (
+    re.compile(r'"csrf_token"\s*value="([^"]+)"'),
+    re.compile(r'"csrf_token"\s*:\s*"([^"]+)"'),
+    re.compile(r'(?:window\.)?__CSRF__\s*=\s*"([^"]+)"'),
+)
+
 _COOKIE_B64_JSON_MAGIC = "hcj1:"
+
+
+def _extract_csrf(html: str) -> str:
+    for pattern in _CSRF_PATTERNS:
+        match = pattern.search(html)
+        if match and match.group(1):
+            return match.group(1)
+    raise ValueError(f"Не удалось найти csrf_token: {html[:200]}")
 
 
 def _encode_cookie_state(session: ClientSession) -> str:
@@ -140,15 +170,22 @@ class YandexSession:
         except Exception:
             _LOGGER.debug("Cookie restore failed (ignored)", exc_info=True)
 
+    async def _fetch_page_csrf(self) -> str:
+        r = await self._get(_AM_URL, headers=_DEFAULT_HEADERS)
+        return _extract_csrf(await r.text())
+
+    def _bff_headers(self, csrf: str) -> Dict[str, str]:
+        return {
+            **_DEFAULT_HEADERS,
+            "X-CSRF-Token": csrf,
+            "Origin": _PASSPORT_URL,
+            "Referer": _BFF_REFERER,
+        }
+
     async def login_username(self, username: str) -> LoginResponse:
         """Создать сессию логина и вернуть поддерживаемые методы авторизации."""
-        # Шаг 1: получение csrf_token
-        r = await self._get("https://passport.yandex.ru/am?app_platform=android")
-        resp = await r.text()
-        m = re.search(r'"csrf_token" value="([^"]+)"', resp)
-        if not m:
-            raise ValueError(f"Не удалось найти csrf_token в ответе: {resp[:200]}")
-        self.auth_payload = {"csrf_token": m[1]}
+        csrf = await self._fetch_page_csrf()
+        self.auth_payload = {"csrf_token": csrf}
 
         # Шаг 2: получение track_id
         r = await self._post(
@@ -230,37 +267,39 @@ class YandexSession:
                 "track_id": str,  # track_id для проверки статуса
             }
         """
-        # Шаг 1: получение csrf_token
-        r = await self._get("https://passport.yandex.ru/am?app_platform=android")
-        resp = await r.text()
-        m = re.search(r'"csrf_token" value="([^"]+)"', resp)
-        if not m:
-            raise ValueError(f"Не удалось найти csrf_token: {resp[:200]}")
+        page_csrf = await self._fetch_page_csrf()
+        bff_headers = self._bff_headers(page_csrf)
 
-        # Шаг 2: получение track_id
         r = await self._post(
-            "https://passport.yandex.ru/registration-validations/auth/password/submit",
-            data={
-                "csrf_token": m[1],
-                "retpath": "https://passport.yandex.ru/profile",
-                "with_code": 1,
-            },
+            _SUBMIT_URL,
+            json={"retpath": f"{_PASSPORT_URL}/profile"},
+            headers={**bff_headers, "Content-Type": "application/json"},
         )
-        resp = await r.json()
-        if resp["status"] != "ok":
-            raise ValueError(f"Ошибка получения QR: {resp}")
+        auth_state = await r.json()
+        track_id = auth_state.get("track_id")
+        if not track_id:
+            raise ValueError(f"Ошибка получения QR: {auth_state}")
 
-        track_id = resp["track_id"]
+        r = await self._post(
+            _MAGIC_CODE_URL,
+            data={
+                "location_id": "0",
+                "magic_track_id": track_id,
+                "track_id": "",
+            },
+            headers=bff_headers,
+        )
+        magic_resp = await r.json()
+        qr_url = magic_resp.get("link")
+        if not qr_url:
+            raise ValueError(f"Ошибка получения QR link: {magic_resp}")
+
         self.auth_payload = {
-            "csrf_token": resp["csrf_token"],
+            "page_csrf": page_csrf,
+            "auth_state": auth_state,
             "track_id": track_id,
         }
 
-        # URL для открытия в браузере
-        qr_url = f"https://passport.yandex.ru/auth/magic/code/?track_id={track_id}"
-        
-        # Для QR-кода используем специальный формат, который понимает приложение Яндекс
-        # Яндекс использует формат: yandexauth://magic?track_id=...
         qr_data = f"yandexauth://magic?track_id={track_id}"
         
         # Извлекаем SVG QR-код со страницы Яндекса
@@ -317,16 +356,31 @@ class YandexSession:
         """Проверить статус QR-авторизации."""
         if not self.auth_payload:
             raise ValueError("Сначала вызовите get_qr")
-        
+
+        page_csrf = self.auth_payload.get("page_csrf") or self.auth_payload.get("csrf_token")
+        auth_state = self.auth_payload.get("auth_state")
+        if not page_csrf or not auth_state:
+            raise ValueError("QR-сессия устарела, начните авторизацию заново")
+
+        headers = self._bff_headers(page_csrf)
         r = await self._post(
-            "https://passport.yandex.ru/auth/new/magic/status/",
-            data=self.auth_payload
+            _STATUS_URL,
+            json=auth_state,
+            headers={**headers, "Content-Type": "application/json"},
         )
-        resp = await r.json()
-        # resp={} если авторизация еще не завершена
-        if resp.get("status") != "ok":
+        status_resp = await r.json()
+        if status_resp.get("state") != _QR_STATE_CONFIRMED:
             return LoginResponse({})
 
+        session_track_id = status_resp.get("trackId")
+        if not session_track_id:
+            raise ValueError(f"QR подтверждён, но trackId отсутствует: {status_resp}")
+
+        await self._post(
+            _GET_SESSION_URL,
+            data={"track_id": session_track_id},
+            headers=headers,
+        )
         return await self.login_cookies()
 
     async def login_cookies(self, cookies: Optional[str] = None) -> LoginResponse:
