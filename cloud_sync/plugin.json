@@ -1,0 +1,125 @@
+{
+  "class_path": "plugins.cloud_sync.plugin.CloudSyncPlugin",
+  "name": "cloud_sync",
+  "version": "0.1.0",
+  "description": "Выгрузка и синхронизация файлов с облачными хранилищами (Яндекс.Диск, Google Drive, Dropbox)",
+  "author": "Home Console",
+  "dependencies": [],
+  "optional_dependencies": [
+    {
+      "name": "oauth_google",
+      "reason": "Google Drive через OAuth вместо статического refresh_token"
+    },
+    {
+      "name": "oauth_dropbox",
+      "reason": "Dropbox через OAuth вместо статического access_token"
+    }
+  ],
+  "namespace": "cloud_sync",
+  "provides_services": [
+    "cloud_sync.upload",
+    "cloud_sync.download",
+    "cloud_sync.list",
+    "cloud_sync.delete",
+    "cloud_sync.providers"
+  ],
+  "provides_events": [
+    "cloud_sync.upload_completed",
+    "cloud_sync.upload_failed",
+    "cloud_sync.download_completed"
+  ],
+  "storage_namespaces": [
+    "cloud_sync"
+  ],
+  "role": "capability_provider",
+  "user_facing": true,
+  "is_integration": true,
+  "integration_name": "Cloud Sync",
+  "integration_flags": [
+    "requires_config"
+  ],
+  "tags": [
+    "cloud",
+    "storage",
+    "sync",
+    "yandex-disk",
+    "google-drive",
+    "dropbox"
+  ],
+  "contract": {
+    "consumes_services": [
+      {
+        "service": "oauth_google.get_access_token",
+        "reason": "Получить токен Google Drive (если oauth_google установлен)"
+      },
+      {
+        "service": "oauth_dropbox.get_access_token",
+        "reason": "Получить токен Dropbox (если oauth_dropbox установлен)"
+      }
+    ],
+    "subscribes_events": [
+      {
+        "event": "file.uploaded",
+        "reason": "Автовыгрузка файлов от client-manager в облако"
+      }
+    ],
+    "capabilities_required": [],
+    "provides_services": [
+      {
+        "service": "cloud_sync.upload",
+        "description": "Загрузить файл в облако"
+      },
+      {
+        "service": "cloud_sync.download",
+        "description": "Скачать файл из облака"
+      },
+      {
+        "service": "cloud_sync.list",
+        "description": "Список файлов"
+      },
+      {
+        "service": "cloud_sync.delete",
+        "description": "Удалить файл"
+      },
+      {
+        "service": "cloud_sync.providers",
+        "description": "Список провайдеров"
+      },
+      {
+        "service": "cloud_sync.sync.create",
+        "description": "Создать задание синхронизации"
+      },
+      {
+        "service": "cloud_sync.sync.list",
+        "description": "Список заданий"
+      },
+      {
+        "service": "cloud_sync.sync.delete",
+        "description": "Удалить задание"
+      },
+      {
+        "service": "cloud_sync.sync.run_now",
+        "description": "Запустить задание немедленно"
+      }
+    ],
+    "provides_events": [
+      {
+        "event": "cloud_sync.upload_completed",
+        "description": "Файл загружен"
+      },
+      {
+        "event": "cloud_sync.upload_failed",
+        "description": "Ошибка загрузки"
+      },
+      {
+        "event": "cloud_sync.download_completed",
+        "description": "Файл скачан"
+      },
+      {
+        "event": "cloud_sync.sync_completed",
+        "description": "Синхронизация завершена"
+      }
+    ],
+    "capabilities_provided": []
+  }
+}

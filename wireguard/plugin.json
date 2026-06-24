@@ -1,0 +1,184 @@
+{
+  "name": "wireguard",
+  "version": "0.1.0",
+  "description": "WireGuard VPN: управление несколькими сетями, peer-менеджмент, mesh-мониторинг",
+  "author": "Home Console",
+  "class_path": "plugins.wireguard.plugin.WireGuardPlugin",
+  "role": "capability_provider",
+  "dependencies": [],
+  "namespace": "wireguard",
+  "provides_services": [
+    "wireguard.create_network",
+    "wireguard.delete_network",
+    "wireguard.list_networks",
+    "wireguard.network_status",
+    "wireguard.get_config",
+    "wireguard.add_peer",
+    "wireguard.remove_peer",
+    "wireguard.list_peers",
+    "wireguard.peer_stats",
+    "wireguard.mesh_health"
+  ],
+  "provides_events": [
+    "wireguard.tunnel_up",
+    "wireguard.tunnel_down",
+    "wireguard.peer_added",
+    "wireguard.peer_removed",
+    "wireguard.network_created",
+    "wireguard.network_deleted"
+  ],
+  "capabilities_provided": [
+    "wireguard:vpn"
+  ],
+  "storage_namespaces": [
+    "wireguard"
+  ],
+  "user_facing": true,
+  "is_integration": false,
+  "tags": [
+    "vpn",
+    "wireguard",
+    "networking",
+    "mesh"
+  ],
+  "contract": {
+    "consumes_services": [
+      {
+        "service": "client_manager.list_clients",
+        "reason": "Получить список подключённых агентов для mesh monitoring"
+      },
+      {
+        "service": "client_manager._impl.execute_command",
+        "reason": "Запустить wg show на удалённом агенте"
+      }
+    ],
+    "subscribes_events": [
+      {
+        "event": "client.connected",
+        "reason": "Автоматически добавить пир WireGuard при подключении агента"
+      }
+    ],
+    "capabilities_required": [],
+    "provides_services": [
+      {
+        "service": "wireguard.create_network",
+        "description": "Создать WireGuard сеть"
+      },
+      {
+        "service": "wireguard.delete_network",
+        "description": "Удалить сеть"
+      },
+      {
+        "service": "wireguard.list_networks",
+        "description": "Список сетей"
+      },
+      {
+        "service": "wireguard.network_status",
+        "description": "Статус сети"
+      },
+      {
+        "service": "wireguard.get_config",
+        "description": "Получить .conf для клиента"
+      },
+      {
+        "service": "wireguard.add_peer",
+        "description": "Добавить пир"
+      },
+      {
+        "service": "wireguard.remove_peer",
+        "description": "Удалить пир"
+      },
+      {
+        "service": "wireguard.list_peers",
+        "description": "Список пиров"
+      },
+      {
+        "service": "wireguard.peer_stats",
+        "description": "Статистика туннелей"
+      },
+      {
+        "service": "wireguard.mesh_health",
+        "description": "Здоровье mesh-сети"
+      },
+      {
+        "service": "wireguard.tunnel_status",
+        "description": "Статус туннелей агента"
+      },
+      {
+        "service": "wireguard.mesh_snapshot",
+        "description": "Полный снапшот mesh"
+      },
+      {
+        "service": "wireguard.port_pool",
+        "description": "Пул портов"
+      }
+    ],
+    "provides_events": [
+      {
+        "event": "wireguard.tunnel_up",
+        "description": "Туннель поднялся"
+      },
+      {
+        "event": "wireguard.tunnel_down",
+        "description": "Туннель упал"
+      },
+      {
+        "event": "wireguard.peer_added",
+        "description": "Пир добавлен"
+      },
+      {
+        "event": "wireguard.peer_removed",
+        "description": "Пир удалён"
+      },
+      {
+        "event": "wireguard.network_created",
+        "description": "Сеть создана"
+      },
+      {
+        "event": "wireguard.network_deleted",
+        "description": "Сеть удалена"
+      }
+    ],
+    "capabilities_provided": [
+      "wireguard:vpn"
+    ]
+  },
+  "cli": {
+    "subcommands": [
+      {
+        "name": "wg",
+        "description": "Управление WireGuard сетями и пирами",
+        "commands": [
+          {
+            "name": "networks",
+            "description": "Список WireGuard сетей",
+            "service": "wireguard.list_networks",
+            "args": []
+          },
+          {
+            "name": "peers",
+            "description": "Список пиров в сети",
+            "service": "wireguard.list_peers",
+            "args": [
+              {
+                "name": "network",
+                "help": "Имя сети (default: default)"
+              }
+            ]
+          },
+          {
+            "name": "health",
+            "description": "Состояние mesh-сети",
+            "service": "wireguard.mesh_health",
+            "args": [
+              {
+                "name": "network",
+                "help": "Имя сети (default: default)"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

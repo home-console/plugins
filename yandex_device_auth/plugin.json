@@ -1,34 +1,60 @@
 {
-    "name": "yandex_device_auth",
-    "version": "0.1.0",
-    "description": "Device/QR авторизация Яндекса для получения session cookies (Quasar WebSocket)",
-    "author": "Home Console",
-    "license": "MIT",
-    "type": "authentication",
-    "class_path": "plugins.yandex_device_auth.plugin.YandexDeviceAuthPlugin",
-    "requires": [
-        "core"
+  "name": "yandex_device_auth",
+  "version": "0.1.0",
+  "description": "Device/QR авторизация Яндекса для получения session cookies (Quasar WebSocket)",
+  "author": "Home Console",
+  "license": "MIT",
+  "type": "authentication",
+  "class_path": "plugins.yandex_device_auth.plugin.YandexDeviceAuthPlugin",
+  "requires": [
+    "core"
+  ],
+  "namespace": "yandex.device_auth",
+  "provides_services": [
+    "device_auth.*"
+  ],
+  "provides_operations": [
+    "device_auth.*"
+  ],
+  "storage_namespaces": [
+    "yandex"
+  ],
+  "is_integration": true,
+  "integration_name": "Yandex Device Auth",
+  "config": {
+    "enabled": true,
+    "poll_interval": 5,
+    "session_timeout": 600
+  },
+  "documentation": {
+    "readme": "README.md",
+    "architecture": "../../../docs/YANDEX_DEVICE_AUTH_ARCHITECTURE.md",
+    "sequence": "../../../docs/YANDEX_DEVICE_AUTH_SEQUENCE.md"
+  },
+  "contract": {
+    "consumes_services": [
+      {
+        "service": "oauth_yandex.get_access_token",
+        "reason": "Получить токен для авторизации устройств"
+      }
     ],
-    "namespace": "yandex.device_auth",
-    "provides_services": [
-        "device_auth.*"
+    "subscribes_events": [],
+    "capabilities_required": [
+      "oauth:yandex"
     ],
-    "provides_operations": [
-        "device_auth.*"
+    "provides_services": [],
+    "provides_events": [
+      {
+        "event": "yandex.device_auth.linked",
+        "description": "Устройство привязано"
+      },
+      {
+        "event": "yandex.device_auth.unlinked",
+        "description": "Устройство отвязано"
+      }
     ],
-    "storage_namespaces": [
-        "yandex"
-    ],
-    "is_integration": true,
-    "integration_name": "Yandex Device Auth",
-    "config": {
-        "enabled": true,
-        "poll_interval": 5,
-        "session_timeout": 600
-    },
-    "documentation": {
-        "readme": "README.md",
-        "architecture": "../../../docs/YANDEX_DEVICE_AUTH_ARCHITECTURE.md",
-        "sequence": "../../../docs/YANDEX_DEVICE_AUTH_SEQUENCE.md"
-    }
+    "capabilities_provided": [
+      "yandex:session_cookies"
+    ]
+  }
 }

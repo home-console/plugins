@@ -1,0 +1,65 @@
+{
+  "name": "oauth_dropbox",
+  "version": "0.1.0",
+  "description": "OAuth 2.0 PKCE провайдер для Dropbox. Используется cloud_sync для авторизации вместо статического access_token.",
+  "author": "Home Console",
+  "class_path": "plugins.oauth_dropbox.plugin.OAuthDropboxPlugin",
+  "role": "capability_provider",
+  "dependencies": [],
+  "namespace": "oauth_dropbox",
+  "provides_services": [
+    "oauth_dropbox.get_status",
+    "oauth_dropbox.get_authorize_url",
+    "oauth_dropbox.exchange_code",
+    "oauth_dropbox.get_access_token",
+    "oauth_dropbox.revoke"
+  ],
+  "capabilities_provided": [
+    "oauth:dropbox"
+  ],
+  "storage_namespaces": [
+    "oauth_dropbox"
+  ],
+  "user_facing": false,
+  "is_integration": true,
+  "integration_name": "Dropbox OAuth",
+  "integration_flags": [
+    "requires_config"
+  ],
+  "tags": [
+    "dropbox",
+    "oauth",
+    "cloud"
+  ],
+  "contract": {
+    "consumes_services": [],
+    "subscribes_events": [],
+    "capabilities_required": [],
+    "provides_services": [
+      {
+        "service": "oauth_dropbox.get_status",
+        "description": "Статус авторизации Dropbox"
+      },
+      {
+        "service": "oauth_dropbox.get_authorize_url",
+        "description": "URL для OAuth авторизации"
+      },
+      {
+        "service": "oauth_dropbox.exchange_code",
+        "description": "Обменять code на токен"
+      },
+      {
+        "service": "oauth_dropbox.get_access_token",
+        "description": "Получить валидный access_token (авто-refresh)"
+      },
+      {
+        "service": "oauth_dropbox.revoke",
+        "description": "Отозвать токен"
+      }
+    ],
+    "provides_events": [],
+    "capabilities_provided": [
+      "oauth:dropbox"
+    ]
+  }
+}

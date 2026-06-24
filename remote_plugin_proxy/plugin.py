@@ -16,6 +16,15 @@ try:
 except Exception:  # pragma: no cover
     aiohttp = None
 
+try:
+    from modules.api.security.url_validator import validate_external_url as _validate_external_url
+    from core.exceptions import BadRequestError as _BadRequestError
+    _URL_VALIDATOR_AVAILABLE = True
+except ImportError:
+    _validate_external_url = None  # type: ignore[assignment]
+    _BadRequestError = Exception  # type: ignore[assignment,misc]
+    _URL_VALIDATOR_AVAILABLE = False
+
 from sdk.plugin_ext import BasePlugin, PluginMetadata
 
 
@@ -46,6 +55,12 @@ class RemotePluginProxy(BasePlugin):
         self, endpoint: str, method: str = "GET", json_data: Optional[dict] = None
     ) -> dict:
         url = f"{self.remote_url}{endpoint}"
+
+        if _URL_VALIDATOR_AVAILABLE and _validate_external_url is not None:
+            try:
+                _validate_external_url(url, allow_private=True)
+            except _BadRequestError as e:
+                raise RuntimeError(f"RemotePluginProxy: URL blocked by security policy: {e}")
 
         if aiohttp is None:
             def _sync_call():

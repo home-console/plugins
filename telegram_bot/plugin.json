@@ -1,0 +1,72 @@
+{
+  "name": "telegram_bot",
+  "version": "0.1.0",
+  "description": "Telegram-канал для alerting плагина. Подписывается на alert.triggered и отправляет сообщение в чат.",
+  "author": "Home Console",
+  "class_path": "plugins.telegram_bot.plugin.TelegramBotPlugin",
+  "role": "util",
+  "dependencies": [],
+  "namespace": "telegram_bot",
+  "provides_services": [
+    "telegram_bot.send",
+    "telegram_bot.status"
+  ],
+  "storage_namespaces": [],
+  "user_facing": false,
+  "tags": [
+    "telegram",
+    "notifications",
+    "alerting"
+  ],
+  "integration_flags": [
+    "requires_config"
+  ],
+  "contract": {
+    "consumes_services": [],
+    "subscribes_events": [
+      {
+        "event": "alert.triggered",
+        "reason": "Отправлять уведомления в Telegram при срабатывании алертов"
+      }
+    ],
+    "capabilities_required": [],
+    "provides_services": [
+      {
+        "service": "telegram_bot.send",
+        "description": "Отправить сообщение в Telegram"
+      },
+      {
+        "service": "telegram_bot.status",
+        "description": "Статус бота"
+      }
+    ],
+    "provides_events": [],
+    "capabilities_provided": []
+  },
+  "ui": {
+    "pages": [
+      {
+        "path": "/config",
+        "type": "settings",
+        "title": "Telegram Bot Configuration",
+        "config_schema": {
+          "type": "object",
+          "properties": {
+            "TELEGRAM_BOT_TOKEN": {
+              "type": "string",
+              "title": "Bot Token"
+            },
+            "TELEGRAM_CHAT_ID": {
+              "type": "string",
+              "title": "Chat ID or @channel"
+            },
+            "TELEGRAM_PARSE_MODE": {
+              "type": "string",
+              "title": "Parse Mode (HTML / Markdown / MarkdownV2)"
+            }
+          }
+        }
+      }
+    ]
+  }
+}

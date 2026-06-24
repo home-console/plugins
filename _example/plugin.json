@@ -12,5 +12,13 @@
     "storage_namespaces": [],
     "user_facing": false,
     "is_integration": false,
-    "tags": ["example", "template"]
+    "tags": ["example", "template"],
+    "contract": {
+        "consumes_services": [],
+        "subscribes_events": [],
+        "capabilities_required": [],
+        "provides_services": [],
+        "provides_events": [],
+        "capabilities_provided": []
+    }
 }

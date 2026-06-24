@@ -20,7 +20,15 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
-REQUIRED_FIELDS = {"name", "version", "description", "class_path"}
+REQUIRED_FIELDS = {"name", "version", "description", "author", "class_path"}
+CONTRACT_KEYS = {
+    "consumes_services",
+    "subscribes_events",
+    "capabilities_required",
+    "provides_services",
+    "provides_events",
+    "capabilities_provided",
+}
 NAME_RE = re.compile(r"^[a-z_][a-z0-9_]*$")
 SEMVER_RE = re.compile(r"^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.\-]+)?$")
 ALLOWED_ROLES = {"capability_provider", "integration", "util", "core_extension"}
@@ -116,6 +124,23 @@ def validate(plugin_dir: Path) -> list[str]:
     deps = data.get("dependencies", [])
     if not isinstance(deps, list):
         err("plugin.json.dependencies должен быть массивом строк", errors)
+
+    contract = data.get("contract")
+    if contract is None:
+        err("plugin.json: отсутствует секция contract (обязательна с manifest 2.0)", errors)
+    elif not isinstance(contract, dict):
+        err("plugin.json.contract должен быть object", errors)
+    else:
+        missing_contract = CONTRACT_KEYS - set(contract.keys())
+        if missing_contract:
+            err(
+                f"plugin.json.contract: отсутствуют ключи: {sorted(missing_contract)}",
+                errors,
+            )
+        for key in CONTRACT_KEYS:
+            val = contract.get(key)
+            if val is not None and not isinstance(val, list):
+                err(f"plugin.json.contract.{key} должен быть массивом", errors)
 
     return errors
 

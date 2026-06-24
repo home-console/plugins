@@ -6,5 +6,13 @@
   "author": "Home Console",
   "dependencies": [],
   "execution_mode": "in_process",
-  "dynamic_service_registration": true
+  "dynamic_service_registration": true,
+  "contract": {
+    "consumes_services": [],
+    "subscribes_events": [],
+    "capabilities_required": [],
+    "provides_services": [],
+    "provides_events": [],
+    "capabilities_provided": []
+  }
 }

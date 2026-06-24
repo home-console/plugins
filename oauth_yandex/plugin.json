@@ -1,0 +1,47 @@
+{
+  "class_path": "plugins.oauth_yandex.plugin.OAuthYandexPlugin",
+  "name": "oauth_yandex",
+  "version": "0.1.0",
+  "description": "OAuth helper для Яндекса: получение и хранение токенов",
+  "author": "Home Console",
+  "dependencies": [],
+  "namespace": "oauth",
+  "provides_services": [
+    "yandex.login.*"
+  ],
+  "provides_events": [
+    "yandex.login.*"
+  ],
+  "storage_namespaces": [
+    "yandex"
+  ],
+  "role": "capability_provider",
+  "capability": "oauth:yandex",
+  "user_facing": false,
+  "is_integration": true,
+  "integration_name": "Yandex OAuth",
+  "integration_flags": [
+    "requires_config"
+  ],
+  "type": "oauth",
+  "contract": {
+    "consumes_services": [],
+    "subscribes_events": [],
+    "capabilities_required": [],
+    "provides_services": [
+      {
+        "service": "oauth_yandex.get_status",
+        "description": "Статус авторизации Яндекса"
+      },
+      {
+        "service": "oauth_yandex.get_access_token",
+        "description": "Получить access_token (авто-refresh)"
+      }
+    ],
+    "provides_events": [],
+    "capabilities_provided": [
+      "oauth:yandex",
+      "yandex:session_cookies"
+    ]
+  }
+}

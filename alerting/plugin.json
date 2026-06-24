@@ -1,0 +1,78 @@
+{
+  "name": "alerting",
+  "version": "0.1.0",
+  "description": "Правила алертинга: отслеживает события Core и публикует alert.triggered. Каналы (Telegram, webhook) подключаются как отдельные плагины.",
+  "author": "Home Console",
+  "class_path": "plugins.alerting.plugin.AlertingPlugin",
+  "role": "util",
+  "dependencies": [],
+  "namespace": "alerting",
+  "provides_services": [
+    "alerting.create_rule",
+    "alerting.update_rule",
+    "alerting.delete_rule",
+    "alerting.list_rules",
+    "alerting.get_rule",
+    "alerting.enable_rule",
+    "alerting.disable_rule",
+    "alerting.recent_alerts"
+  ],
+  "provides_events": [
+    "alert.triggered"
+  ],
+  "storage_namespaces": [
+    "alerting"
+  ],
+  "user_facing": true,
+  "tags": [
+    "alerting",
+    "monitoring",
+    "notifications"
+  ],
+  "contract": {
+    "consumes_services": [],
+    "subscribes_events": [],
+    "capabilities_required": [],
+    "provides_services": [
+      {
+        "service": "alerting.create_rule",
+        "description": "Создать правило алертинга"
+      },
+      {
+        "service": "alerting.update_rule",
+        "description": "Обновить правило"
+      },
+      {
+        "service": "alerting.delete_rule",
+        "description": "Удалить правило"
+      },
+      {
+        "service": "alerting.list_rules",
+        "description": "Список правил"
+      },
+      {
+        "service": "alerting.get_rule",
+        "description": "Получить правило"
+      },
+      {
+        "service": "alerting.enable_rule",
+        "description": "Включить правило"
+      },
+      {
+        "service": "alerting.disable_rule",
+        "description": "Отключить правило"
+      },
+      {
+        "service": "alerting.recent_alerts",
+        "description": "Последние срабатывания"
+      }
+    ],
+    "provides_events": [
+      {
+        "event": "alert.triggered",
+        "description": "Правило сработало"
+      }
+    ],
+    "capabilities_provided": []
+  }
+}

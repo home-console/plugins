@@ -1,0 +1,109 @@
+{
+  "name": "truenas",
+  "version": "0.1.0",
+  "description": "TrueNAS Scale интеграция: управление пулами, датасетами, снапшотами и шарами через REST API v2.",
+  "author": "Home Console",
+  "class_path": "plugins.truenas.plugin.TrueNASPlugin",
+  "role": "integration",
+  "dependencies": [],
+  "namespace": "truenas",
+  "provides_services": [
+    "truenas.system.info",
+    "truenas.pool.list",
+    "truenas.dataset.list",
+    "truenas.dataset.create",
+    "truenas.dataset.delete",
+    "truenas.snapshot.list",
+    "truenas.snapshot.create",
+    "truenas.snapshot.delete",
+    "truenas.share.smb.list",
+    "truenas.share.nfs.list",
+    "truenas.alert.list",
+    "truenas.status"
+  ],
+  "provides_events": [
+    "truenas.snapshot.created",
+    "truenas.dataset.created"
+  ],
+  "storage_namespaces": [],
+  "user_facing": true,
+  "is_integration": true,
+  "integration_name": "TrueNAS Scale",
+  "integration_flags": [
+    "requires_config"
+  ],
+  "tags": [
+    "truenas",
+    "nas",
+    "storage",
+    "zfs",
+    "smb",
+    "nfs"
+  ],
+  "contract": {
+    "consumes_services": [],
+    "subscribes_events": [],
+    "capabilities_required": [],
+    "provides_services": [
+      {
+        "service": "truenas.system.info",
+        "description": "Информация о системе"
+      },
+      {
+        "service": "truenas.pool.list",
+        "description": "Список ZFS-пулов"
+      },
+      {
+        "service": "truenas.dataset.list",
+        "description": "Список датасетов"
+      },
+      {
+        "service": "truenas.dataset.create",
+        "description": "Создать датасет"
+      },
+      {
+        "service": "truenas.dataset.delete",
+        "description": "Удалить датасет"
+      },
+      {
+        "service": "truenas.snapshot.list",
+        "description": "Список снапшотов"
+      },
+      {
+        "service": "truenas.snapshot.create",
+        "description": "Создать снапшот"
+      },
+      {
+        "service": "truenas.snapshot.delete",
+        "description": "Удалить снапшот"
+      },
+      {
+        "service": "truenas.share.smb.list",
+        "description": "SMB-шары"
+      },
+      {
+        "service": "truenas.share.nfs.list",
+        "description": "NFS-шары"
+      },
+      {
+        "service": "truenas.alert.list",
+        "description": "Алерты TrueNAS"
+      },
+      {
+        "service": "truenas.status",
+        "description": "Статус подключения"
+      }
+    ],
+    "provides_events": [
+      {
+        "event": "truenas.snapshot.created",
+        "description": "Снапшот создан"
+      },
+      {
+        "event": "truenas.dataset.created",
+        "description": "Датасет создан"
+      }
+    ],
+    "capabilities_provided": []
+  }
+}

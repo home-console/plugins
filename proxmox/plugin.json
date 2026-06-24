@@ -1,0 +1,128 @@
+{
+  "name": "proxmox",
+  "version": "0.1.0",
+  "description": "Proxmox VE интеграция: управление VM и LXC-контейнерами через REST API. Также регистрирует ProxmoxCommandAdapter для агентов с pvesh.",
+  "author": "Home Console",
+  "class_path": "plugins.proxmox.plugin.ProxmoxPlugin",
+  "role": "integration",
+  "dependencies": [],
+  "namespace": "proxmox",
+  "provides_services": [
+    "proxmox.node.list",
+    "proxmox.node.status",
+    "proxmox.vm.list",
+    "proxmox.vm.start",
+    "proxmox.vm.stop",
+    "proxmox.vm.reboot",
+    "proxmox.vm.status",
+    "proxmox.ct.list",
+    "proxmox.ct.start",
+    "proxmox.ct.stop",
+    "proxmox.storage.list",
+    "proxmox.backup.list",
+    "proxmox.status"
+  ],
+  "provides_events": [
+    "proxmox.vm.started",
+    "proxmox.vm.stopped",
+    "proxmox.ct.started",
+    "proxmox.ct.stopped"
+  ],
+  "storage_namespaces": [],
+  "user_facing": true,
+  "is_integration": true,
+  "integration_name": "Proxmox VE",
+  "integration_flags": [
+    "requires_config"
+  ],
+  "tags": [
+    "proxmox",
+    "virtualization",
+    "vm",
+    "lxc",
+    "infrastructure"
+  ],
+  "contract": {
+    "consumes_services": [
+      {
+        "service": "client_manager.commands.register",
+        "reason": "Зарегистрировать ProxmoxCommandAdapter для агентов с pvesh"
+      }
+    ],
+    "subscribes_events": [],
+    "capabilities_required": [],
+    "provides_services": [
+      {
+        "service": "proxmox.node.list",
+        "description": "Список PVE-узлов"
+      },
+      {
+        "service": "proxmox.node.status",
+        "description": "Статус узла"
+      },
+      {
+        "service": "proxmox.vm.list",
+        "description": "Список VM"
+      },
+      {
+        "service": "proxmox.vm.start",
+        "description": "Запустить VM"
+      },
+      {
+        "service": "proxmox.vm.stop",
+        "description": "Остановить VM"
+      },
+      {
+        "service": "proxmox.vm.reboot",
+        "description": "Перезагрузить VM"
+      },
+      {
+        "service": "proxmox.vm.status",
+        "description": "Статус VM"
+      },
+      {
+        "service": "proxmox.ct.list",
+        "description": "Список контейнеров"
+      },
+      {
+        "service": "proxmox.ct.start",
+        "description": "Запустить контейнер"
+      },
+      {
+        "service": "proxmox.ct.stop",
+        "description": "Остановить контейнер"
+      },
+      {
+        "service": "proxmox.storage.list",
+        "description": "Список хранилищ"
+      },
+      {
+        "service": "proxmox.backup.list",
+        "description": "Список бэкапов"
+      },
+      {
+        "service": "proxmox.status",
+        "description": "Статус подключения"
+      }
+    ],
+    "provides_events": [
+      {
+        "event": "proxmox.vm.started",
+        "description": "VM запущена"
+      },
+      {
+        "event": "proxmox.vm.stopped",
+        "description": "VM остановлена"
+      },
+      {
+        "event": "proxmox.ct.started",
+        "description": "Контейнер запущен"
+      },
+      {
+        "event": "proxmox.ct.stopped",
+        "description": "Контейнер остановлен"
+      }
+    ],
+    "capabilities_provided": []
+  }
+}

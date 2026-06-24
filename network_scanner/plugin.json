@@ -1,12 +1,20 @@
 {
-    "class_path": "plugins.network_scanner.plugin.NetworkScannerPlugin",
-    "name": "network_scanner",
-    "version": "0.1.0",
-    "description": "Сканирование локальной сети и обнаружение устройств",
-    "author": "Home Console",
-    "dependencies": [],
-    "provides_events": [
-        "external.device_discovered"
-    ],
-    "is_integration": false
+  "class_path": "plugins.network_scanner.plugin.NetworkScannerPlugin",
+  "name": "network_scanner",
+  "version": "0.1.0",
+  "description": "Сканирование локальной сети и обнаружение устройств",
+  "author": "Home Console",
+  "dependencies": [],
+  "provides_events": [
+    "external.device_discovered"
+  ],
+  "is_integration": false,
+  "contract": {
+    "consumes_services": [],
+    "subscribes_events": [],
+    "capabilities_required": [],
+    "provides_services": [],
+    "provides_events": [],
+    "capabilities_provided": []
+  }
 }

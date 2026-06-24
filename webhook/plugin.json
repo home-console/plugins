@@ -1,0 +1,76 @@
+{
+  "name": "webhook",
+  "version": "0.2.0",
+  "description": "Webhook-канал уведомлений. Подписывается на alert.triggered и отправляет HTTP POST на несколько настраиваемых URL. Подписи HMAC-SHA256.",
+  "author": "Home Console",
+  "class_path": "plugins.webhook.plugin.WebhookPlugin",
+  "role": "util",
+  "dependencies": [],
+  "namespace": "webhook",
+  "provides_services": [
+    "webhook.add_endpoint",
+    "webhook.remove_endpoint",
+    "webhook.list_endpoints",
+    "webhook.send",
+    "webhook.status"
+  ],
+  "provides_events": [
+    "webhook.sent",
+    "webhook.failed"
+  ],
+  "storage_namespaces": [
+    "webhook"
+  ],
+  "user_facing": false,
+  "tags": [
+    "webhook",
+    "notifications",
+    "alerting"
+  ],
+  "integration_flags": [
+    "requires_config"
+  ],
+  "contract": {
+    "consumes_services": [],
+    "subscribes_events": [
+      {
+        "event": "alert.triggered",
+        "reason": "HTTP POST на настроенные URL при срабатывании алертов"
+      }
+    ],
+    "capabilities_required": [],
+    "provides_services": [
+      {
+        "service": "webhook.add_endpoint",
+        "description": "Добавить webhook-эндпоинт"
+      },
+      {
+        "service": "webhook.remove_endpoint",
+        "description": "Удалить эндпоинт"
+      },
+      {
+        "service": "webhook.list_endpoints",
+        "description": "Список эндпоинтов"
+      },
+      {
+        "service": "webhook.send",
+        "description": "Отправить произвольный запрос"
+      },
+      {
+        "service": "webhook.status",
+        "description": "Статус всех эндпоинтов"
+      }
+    ],
+    "provides_events": [
+      {
+        "event": "webhook.sent",
+        "description": "Webhook успешно отправлен"
+      },
+      {
+        "event": "webhook.failed",
+        "description": "Webhook не удалось отправить"
+      }
+    ],
+    "capabilities_provided": []
+  }
+}
