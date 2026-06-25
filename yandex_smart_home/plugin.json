@@ -102,7 +102,11 @@
       "description": "Регистрировать устройства в Home Console и отправлять команды (вкл/выкл, яркость и др.)",
       "sensitivity": "medium",
       "requires": {
-        "services": ["devices.auto_map_own"],
+        "services": [
+          "devices.auto_map_own",
+          "devices.get",
+          "devices.update_device_fields"
+        ],
         "events": ["internal.device_command_requested"]
       }
     }
